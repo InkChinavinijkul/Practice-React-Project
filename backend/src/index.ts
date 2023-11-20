@@ -2,26 +2,14 @@
 process.env.BUILD_STATUS = "DEV"
 
 import { ApolloServer, gql } from "apollo-server-express"
-// import typeDef from "./typeDefs"
-// import resolver from "./resolvers"
+import typeDefs from "./typeDefs"
+import resolvers from "./resolvers"
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core"
 import cors from "cors"
 import { graphqlUploadExpress } from "graphql-upload"
 import { createServer } from "http"
 import { GraphQLError } from "graphql"
 // import { getUser } from "./General/utilities"
-
-const typeDef = gql`
-	type Query {
-		hello: String
-	}
-`
-
-const resolver = {
-	Query: {
-		hello: () => "Hello, world!",
-	},
-}
 
 export interface IContext {
 	user: {
@@ -40,8 +28,8 @@ async function main() {
 	const httpServer = createServer(app)
 
 	const server = new ApolloServer({
-		typeDefs: typeDef,
-		resolvers: resolver,
+		typeDefs,
+		resolvers,
 	})
 
 	await server.start()
