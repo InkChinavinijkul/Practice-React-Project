@@ -1,4 +1,3 @@
-// import "./App.css"
 import { RouterProvider } from "react-router-dom"
 import { router } from "./resource/routes/broswerRoutes"
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client"

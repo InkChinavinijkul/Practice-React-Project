@@ -18,7 +18,7 @@ const NavBarMobile = (props: INavBarMobileProps): JSX.Element => {
       open={toggleMobileNavBar}
       sx={{
         "& .MuiDrawer-paper": {
-          backgroundColor: "#272976",
+          backgroundColor: "#4786b8",
           color: "#FFFFFF"
         }
       }}

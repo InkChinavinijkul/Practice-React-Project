@@ -5,6 +5,8 @@ import LoginLayout from "./LoginLayout"
 import GameOfLife from "@src/pages/GameOfLife"
 import VideoPlayer from "@src/pages/VideoPlayer"
 import MainLayout from "./MainLayout"
+import RequireAuth from "./RequireAuth"
+import Login from "@src/pages/Login"
 
 // export const router = createBrowserRouter([
 // 	{
@@ -152,42 +154,109 @@ import MainLayout from "./MainLayout"
 // ])
 
 export const router = createBrowserRouter([
-	{
-		path: "/",
-		element: <MainLayout />,
-		errorElement: <ErrorPage />,
-		children: [
-			{
-				errorElement: <ErrorPage />,
-				children: [
-					{
-						index: true,
-						element: <FunCounter />,
-					},
-					{
-						path: "funcounter",
-						element: <FunCounter />,
-					},
-					{
-						path: "gameoflife",
-						element: <GameOfLife />,
-					},
-					{
-						path: "videoplayer",
-						element: <VideoPlayer />,
-					},
-				],
-			},
-		],
-	},
-	// {
-	// 	element: <LoginLayout />,
-	// 	errorElement: <ErrorPage />,
-	// 	children: [
-	// 		{
-	// 			path: "login",
-	// 			element: <Login />,
-	// 		},
-	// 	],
-	// },
+  {
+    path: "/",
+    element: (
+      <RequireAuth renderedElement={<MainLayout />} roles={["admin", "user"]} />
+    ),
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            index: true,
+            element: (
+              <RequireAuth
+                renderedElement={<FunCounter />}
+                roles={["admin", "user"]}
+              />
+            )
+          },
+          {
+            path: "funcounter",
+            element: (
+              <RequireAuth
+                renderedElement={<FunCounter />}
+                roles={["admin", "user"]}
+              />
+            )
+          },
+          {
+            path: "gameoflife",
+            element: (
+              <RequireAuth
+                renderedElement={<GameOfLife />}
+                roles={["admin", "user"]}
+              />
+            )
+          },
+          {
+            path: "videoplayer",
+            element: (
+              <RequireAuth
+                renderedElement={<VideoPlayer />}
+                roles={["admin", "user"]}
+              />
+            )
+          }
+        ]
+      }
+    ]
+  },
+  {
+    element: <LoginLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "login",
+        element: <Login />
+      }
+    ]
+  }
 ])
+
+// export const router = createBrowserRouter([
+//   {
+//     path: "/",
+//     element: <MainLayout />,
+//     errorElement: <ErrorPage />,
+//     children: [
+//       {
+//         errorElement: <ErrorPage />,
+//         children: [
+//           {
+//             index: true,
+//             element: <FunCounter />
+//           },
+//           {
+//             path: "funcounter",
+//             element: <FunCounter />
+//           },
+//           {
+//             path: "gameoflife",
+//             element: <GameOfLife />
+//           },
+//           {
+//             path: "videoplayer",
+//             element: <VideoPlayer />
+//           },
+//           {
+//             path: "login",
+//             element: <Login />
+//           }
+//         ]
+//       }
+//     ]
+//   }
+//   // {
+//   // 	element: <LoginLayout />,
+//   // 	errorElement: <ErrorPage />,
+//   // 	children: [
+//   // 		{
+//   // 			path: "login",
+//   // 			element: <Login />,
+//   // 		},
+//   // 	],
+//   // },
+// ])
