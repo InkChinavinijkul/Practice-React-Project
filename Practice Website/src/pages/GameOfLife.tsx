@@ -1,5 +1,7 @@
 import { TextField } from "@mui/material"
-import { isNaNReturnZero } from "@src/resource/utilities"
+import CustomButton from "@src/resource/components/CustomButton"
+import CustomInput from "@src/resource/components/CustomInput"
+import { checkLS, isNaNReturnZero } from "@src/resource/utilities"
 import React, { useState, useEffect } from "react"
 
 interface IGameCellProps {
@@ -8,10 +10,6 @@ interface IGameCellProps {
   toggleCell: () => void
   cellState: boolean
   cellSize: number
-}
-
-interface ICustomButtonProps extends React.ComponentPropsWithoutRef<"button"> {
-  children?: React.ReactNode
 }
 
 interface IGameSave {
@@ -44,17 +42,6 @@ const generateGrid = (
   )
 }
 
-// utilities + idk if this works for {[]} if that actually exists
-const checkLS = (key: string) => {
-  if (
-    !localStorage.getItem(key) ||
-    Object.keys(localStorage.getItem(key)!).length === 0 // overthinking?
-  ) {
-    return false
-  }
-  return true
-}
-
 // uhh right way to memo?
 // also i'd put these in a separate folder in larger projects (and if i actually reuse them)
 const GameCell = React.memo((props: IGameCellProps): JSX.Element => {
@@ -72,31 +59,6 @@ const GameCell = React.memo((props: IGameCellProps): JSX.Element => {
     />
   )
 })
-
-const CustomButton = (props: ICustomButtonProps) => {
-  const { children, onClick, type } = props
-  return (
-    <button
-      type={type}
-      style={{
-        backgroundColor: "white",
-        color: "black",
-        padding: "7.5px",
-        margin: "20px 10px",
-        border: "2px solid pink"
-      }}
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  )
-}
-
-const CustomInput = (props: React.ComponentPropsWithoutRef<"input">) => {
-  return (
-    <input {...props} style={{ backgroundColor: "white", color: "black" }} />
-  )
-}
 
 const GameOfLife = () => {
   const [numRows, setNumRows] = useState<number>(10)
@@ -236,18 +198,20 @@ const GameOfLife = () => {
 
   return (
     <div>
-      <h1 style={{ ...GOL_COMMON_DISPLAY }}>Game of Life</h1>
+      <h1 style={{ ...GOL_COMMON_DISPLAY, letterSpacing: ".15rem" }}>
+        Game of Life
+      </h1>
       <h3 style={{ ...GOL_COMMON_DISPLAY }}>
-        Status:{" "}
+        Status :{"\u00A0"}
         <span style={{ color: isSimming ? "darkgreen" : "red" }}>
-          {isSimming ? "Simulating" : "Nope"}
+          {`${isSimming ? "Simulating" : "Nope"}`}
         </span>
       </h3>
       <div
         id="game-grid"
         style={{
           ...GOL_COMMON_DISPLAY,
-          display: "grid",
+          display: "grid", // can use gridTemp itself to "simulate" MUI Grid behaviour
           gridTemplateColumns: `repeat(${numCols}, ${cellSize}px)`
         }}
       >
@@ -268,104 +232,169 @@ const GameOfLife = () => {
           {isSimming ? "Stop Simulation" : "Start Simulation"}
         </CustomButton>
         <CustomButton onClick={resetGrid}>Reset</CustomButton>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            saveGrid(saveName)
-          }}
-        >
-          <label aria-label="save-name">Save Name</label>
-          <CustomInput
-            type="text"
-            aria-label="save-name-input"
-            value={saveName}
-            onChange={(e) => {
-              setSaveName(e.target.value)
-            }}
-          />
-          <CustomButton onClick={() => saveGrid}>Save State</CustomButton>
-        </form>
         <CustomButton onClick={randomizeGrid}>Randomize</CustomButton>
       </div>
-      <div id="dimensions" style={{ ...GOL_COMMON_DISPLAY }}>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault()
-            // hurr wtf is this shit
-            // i need the old values to properly save the current state of the board
-            // values from input should not affect that
-            // there's definitely a better way to do this...
-            // my solution - save it as an object
-            // object contains row, col, and the board itself
-            // EDIT: i did exactly that, not changing this code (ever?)
-            //	it's late, i'm sleepy
-            setNumRows(newNumRow)
-            setNumCols(newNumCol)
-            setIsSimming(false)
-            const newGrid = generateGrid(newNumRow, newNumCol, false, true)
-            setGameGrid(newGrid)
+      <div
+        id="options-container"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr" }}
+      >
+        <div className="dummy" />
+        <div
+          id="dimensions"
+          style={{
+            ...GOL_COMMON_DISPLAY,
+            alignItems: "center", // this actually doesn't align button with input
+            flexWrap: "wrap",
+            gap: "16px"
           }}
         >
-          <label aria-label="num-rows">Rows</label>
-          <CustomInput
-            type="number"
-            aria-label="new-num-rows"
-            value={newNumRow}
-            onChange={(e) => {
-              setNewNumRow(isNaNReturnZero(+e.target.value))
+          <div
+            style={{
+              ...GOL_COMMON_DISPLAY,
+              width: "100%"
             }}
-          />
-          <label aria-label="num-rows">Columns</label>
-          <CustomInput
-            type="number"
-            aria-label="new-num-cols"
-            value={newNumCol}
-            onChange={(e) => {
-              setNewNumCol(isNaNReturnZero(+e.target.value))
+          >
+            <TextField
+              label="Cell Size"
+              value={cellSize}
+              onChange={(e) => setCellSize(+isNaNReturnZero(+e.target.value))}
+              // sx={{ width: "300px" }}
+              title="last thing i'm putting in and i'm getting pretty\
+				 				sick and tired of html elements at this point so i'm\ 
+				 				cheating a bit here sorry! also could add another button\
+				 				to confirm changing cell size but fk it"
+            />
+          </div>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              // hurr wtf is this shit
+              // i need the old values to properly save the current state of the board
+              // values from input should not affect that
+              // there's definitely a better way to do this...
+              // my solution - save it as an object
+              // object contains row, col, and the board itself
+              // EDIT: i did exactly that, not changing this code (ever?)
+              //	it's late, i'm sleepy
+              setNumRows(newNumRow)
+              setNumCols(newNumCol)
+              setIsSimming(false)
+              const newGrid = generateGrid(newNumRow, newNumCol, false, true)
+              setGameGrid(newGrid)
             }}
-          />
-          <CustomButton>Submit</CustomButton>
-        </form>
-      </div>
-      <div id="load-saves">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            loadGrid(selectSaveName)
+            style={{
+              // this "somehow" aligned submit with input elements
+              // without it submit goes to next line
+              display: "flex"
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                rowGap: "16px"
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <label aria-label="num-rows">Rows</label>
+                <CustomInput
+                  type="number"
+                  aria-label="new-num-rows"
+                  value={newNumRow}
+                  onChange={(e) => {
+                    setNewNumRow(isNaNReturnZero(+e.target.value))
+                  }}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <label aria-label="num-rows">Columns</label>
+                <CustomInput
+                  type="number"
+                  aria-label="new-num-cols"
+                  value={newNumCol}
+                  onChange={(e) => {
+                    setNewNumCol(isNaNReturnZero(+e.target.value))
+                  }}
+                />
+              </div>
+            </div>
+            <CustomButton>Submit</CustomButton>
+          </form>
+        </div>
+        <div
+          id="manage-saves"
+          style={{
+            ...GOL_COMMON_DISPLAY,
+            flexWrap: "wrap",
+            flexDirection: "column",
+            alignItems: "center"
           }}
         >
-          <label aria-label="save-name">Save Name</label>
-          <select
-            value={selectSaveName}
-            id="load-save"
-            onChange={(e) => setSelectSaveName(e.target.value)}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              saveGrid(saveName)
+            }}
           >
-            {gameSaves.length ? (
-              gameSaves.map(({ saveName }) => (
-                <option value={saveName}>{saveName}</option>
-              ))
-            ) : (
-              <option value={"No Save Found"}>{"No Save Found"}</option>
-            )}
-          </select>
-          <CustomButton>Load Save</CustomButton>
-          <CustomButton
-            type="button"
-            onClick={() => deleteSave(selectSaveName)}
+            <label aria-label="save-name">Save Name</label>
+            <CustomInput
+              type="text"
+              aria-label="save-name-input"
+              value={saveName}
+              onChange={(e) => {
+                setSaveName(e.target.value)
+              }}
+            />
+            <CustomButton onClick={() => saveGrid}>Save State</CustomButton>
+          </form>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              loadGrid(selectSaveName)
+            }}
+            // this aligns the form to the center of its container
+            // however it also pushes the other container to the left
+            // can prolly fix this using display flex instead of grid
+            // on the large container
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
           >
-            Delete Save
-          </CustomButton>
-        </form>
+            <select
+              value={selectSaveName}
+              id="load-save"
+              onChange={(e) => setSelectSaveName(e.target.value)}
+              style={{
+                backgroundColor: "white",
+                color: "black",
+                border: "1px solid gray",
+                borderRadius: "20px",
+                padding: "5px 10px",
+                height: "max-content", // limits height of input, otherwise it matches button
+                maxWidth: "30%"
+              }}
+            >
+              {gameSaves.length ? (
+                gameSaves.map(({ saveName }) => (
+                  <option value={saveName}>{saveName}</option>
+                ))
+              ) : (
+                <option value={"No Save Found"}>{"No Save Found"}</option>
+              )}
+            </select>
+            <CustomButton>Load Save</CustomButton>
+            <CustomButton
+              type="button"
+              onClick={() => deleteSave(selectSaveName)}
+            >
+              Delete Save
+            </CustomButton>
+          </form>
+        </div>
+        <div className="dummy" />
       </div>
-      <TextField
-        label="Cell Size"
-        value={cellSize}
-        onChange={(e) => setCellSize(+isNaNReturnZero(+e.target.value))}
-        title="last thing i'm putting in and i'm getting pretty\
-				 sick and tired of html elements at this point so i'm\ 
-				 cheating a bit here sorry! also could add another button\
-				 to confirm changing cell size but fk it"
-      />
     </div>
   )
 }
