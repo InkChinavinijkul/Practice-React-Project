@@ -75,6 +75,8 @@ const GameOfLife = () => {
   const [isSimming, setIsSimming] = useState<boolean>(false)
 
   // get save files
+  // only need to run once to get the value then we just use gameSaves
+  // probably should switch to some lazy query for large array and if we have database
   useEffect(() => {
     if (!checkLS(lsKey)) return
     const { saves } = JSON.parse(localStorage.getItem(lsKey)!) // for ref: dis called postfix !
@@ -116,6 +118,9 @@ const GameOfLife = () => {
   useEffect(() => {
     // update grid
     if (isSimming) {
+      // actually need to use the "alternate form" of setState
+      // for some reason the whole interval thing would work
+      // without making use of prevState
       const updateGrid = () => {
         setGameGrid((prevGrid) => calcNextMove(prevGrid))
       }
